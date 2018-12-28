@@ -47,7 +47,7 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void startTimer(){
-        countDownTimer = new CountDownTimer(timeLeftInMilliseconds, 1000) {
+        countDownTimer = new CountDownTimer(timeLeftInMilliseconds, 500) {
             @Override
             public void onTick(long millisUntilFinished) {
                 timeLeftInMilliseconds = millisUntilFinished;
@@ -61,13 +61,13 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
         }.start();
 
         timerRunning = true;
-        startPauseButton.setText("Pause");
+        startPauseButton.setBackgroundResource(R.drawable.pause_button);
     }
 
     private void pauseTimer(){
         countDownTimer.cancel();
         timerRunning = false;
-        startPauseButton.setText("Start");
+        startPauseButton.setBackgroundResource(R.drawable.play_button);
     }
 
     private void updateCountdownText(){
