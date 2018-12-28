@@ -1,5 +1,6 @@
 package com.example.timo.simplemeditationtimer;
 
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
@@ -16,8 +17,10 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
     private TextView timeTextView;
 
     private CountDownTimer countDownTimer;
-    private long timeLeftInMilliseconds = 600000;
+    private long timeLeftInMilliseconds = 6000;
     private boolean timerRunning;
+    private MediaPlayer singingBowlSound;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +29,7 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
         setContentView(R.layout.activity_meditation);
         timeTextView = findViewById(R.id.timeTextView);
         startPauseButton = findViewById(R.id.startPauseButton);
-
+        singingBowlSound = MediaPlayer.create(this, R.raw.japanese_singing_bowl);
         startPauseButton.setOnClickListener((View.OnClickListener) this);
         updateCountdownText();
 
@@ -53,7 +56,7 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
 
             @Override
             public void onFinish() {
-
+                singingBowlSound.start();
             }
         }.start();
 
