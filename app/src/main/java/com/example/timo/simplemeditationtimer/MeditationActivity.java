@@ -17,7 +17,7 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
     private TextView timeTextView;
 
     private CountDownTimer countDownTimer;
-    private long timeLeftInMilliseconds = 6000;
+    private long timeLeftInMilliseconds = 1200000;
     private boolean timerRunning;
     private MediaPlayer singingBowlSound;
 
