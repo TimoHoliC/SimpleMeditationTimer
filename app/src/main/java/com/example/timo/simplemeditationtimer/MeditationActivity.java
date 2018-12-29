@@ -61,13 +61,13 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
         }.start();
 
         timerRunning = true;
-        startPauseButton.setBackgroundResource(R.drawable.pause_button);
+        startPauseButton.setBackgroundResource(R.drawable.pause_button_small);
     }
 
     private void pauseTimer(){
         countDownTimer.cancel();
         timerRunning = false;
-        startPauseButton.setBackgroundResource(R.drawable.play_button);
+        startPauseButton.setBackgroundResource(R.drawable.play_button_small);
     }
 
     private void updateCountdownText(){
