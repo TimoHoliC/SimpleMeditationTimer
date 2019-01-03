@@ -1,13 +1,18 @@
 package com.example.timo.simplemeditationtimer;
 
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Locale;
 
@@ -15,11 +20,17 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
 
     private Button startPauseButton;
     private TextView timeTextView;
-
+    private TextView phaseTextView;
     private CountDownTimer countDownTimer;
-    private long timeLeftInMilliseconds = 1200000;
+    private long timeLeftInMilliseconds;
     private boolean timerRunning;
     private MediaPlayer singingBowlSound;
+    private boolean timerPositive;
+    private long timeSetInMilliseconds;
+    private long timePerPhaseInMilliseconds;
+    private int phase;
+    private Intent intent;
+
 
 
     @Override
@@ -27,13 +38,33 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_meditation);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        timerPositive = true;
+        intent = getIntent();
+        timeLeftInMilliseconds = intent.getLongExtra("lastOfMeditation",0);
+        phase = intent.getIntExtra("numberOfPhases",0);
+        phaseTextView = findViewById(R.id.phaseTextView);
+        timeSetInMilliseconds = timeLeftInMilliseconds;
         timeTextView = findViewById(R.id.timeTextView);
+        timePerPhaseInMilliseconds = timeSetInMilliseconds / phase;
         startPauseButton = findViewById(R.id.startPauseButton);
         singingBowlSound = MediaPlayer.create(this, R.raw.japanese_singing_bowl);
         startPauseButton.setOnClickListener((View.OnClickListener) this);
-        updateCountdownText();
-
+        timeTextView.setOnClickListener((View.OnClickListener) this);
+        checkForPhaseses();
     }
+
+    private void checkForPhaseses(){
+        if(phase == 1){
+            phaseTextView.setVisibility(View.INVISIBLE);
+            updateCountdownText();
+        }else{
+            updateCountdownText();
+        }
+    }
+
+
 
     @Override
     public void onClick(View v){
@@ -43,6 +74,13 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
             pauseTimer();
         }else if(ce == R.id.startPauseButton && !timerRunning){
             startTimer();
+        }else if (ce == R.id.timeTextView && timerPositive){
+            timerPositive = false;
+            updateCountdownText();
+
+        }else if (ce == R.id.timeTextView && timerPositive == false){
+            timerPositive = true;
+            updateCountdownText();
         }
     }
 
@@ -56,26 +94,53 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
 
             @Override
             public void onFinish() {
+
                 singingBowlSound.start();
             }
         }.start();
 
         timerRunning = true;
-        startPauseButton.setBackgroundResource(R.drawable.pause_button_small);
+        startPauseButton.setBackgroundResource(R.drawable.pause_button);
     }
 
     private void pauseTimer(){
         countDownTimer.cancel();
         timerRunning = false;
-        startPauseButton.setBackgroundResource(R.drawable.play_button_small);
+        startPauseButton.setBackgroundResource(R.drawable.play_button);
     }
 
     private void updateCountdownText(){
-        int minutes = (int) (timeLeftInMilliseconds / 1000) / 60;
-        int seconds = (int) (timeLeftInMilliseconds / 1000) % 60;
 
-        String timeLeftFormatted = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
+        int minutes;
+        int seconds;
 
-        timeTextView.setText(timeLeftFormatted);
+        long difference = timeSetInMilliseconds - timeLeftInMilliseconds;
+
+        phaseTextView.setText("Phase " + phase);
+
+        if(timerPositive) {
+            minutes = (int) (timeLeftInMilliseconds / 1000) / 60;
+            seconds = (int) (timeLeftInMilliseconds / 1000) % 60;
+
+            String timeLeftFormatted = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
+
+            timeTextView.setText("-"+timeLeftFormatted);
+        }else{
+            minutes = (int) (difference / 1000) / 60;
+            seconds = (int) (difference / 1000) % 60;
+
+            String timeLeftFormatted = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
+
+            timeTextView.setText(timeLeftFormatted);
+        }
+
+        updatePhaseText();
+
     }
+
+    private void updatePhaseText(){
+        //if(phase = )
+    }
+
+
 }
