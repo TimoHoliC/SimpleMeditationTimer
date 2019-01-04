@@ -7,12 +7,8 @@ import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.Locale;
 
@@ -29,6 +25,7 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
     private long timeSetInMilliseconds;
     private long timePerPhaseInMilliseconds;
     private int phase;
+    private int phaseDisplayed;
     private Intent intent;
 
 
@@ -39,7 +36,7 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_meditation);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
+        phaseDisplayed = 0;
         timerPositive = true;
         intent = getIntent();
         timeLeftInMilliseconds = intent.getLongExtra("lastOfMeditation",0);
@@ -85,7 +82,7 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void startTimer(){
-        countDownTimer = new CountDownTimer(timeLeftInMilliseconds, 500) {
+        countDownTimer = new CountDownTimer(timeLeftInMilliseconds, 100) {
             @Override
             public void onTick(long millisUntilFinished) {
                 timeLeftInMilliseconds = millisUntilFinished;
@@ -109,6 +106,19 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
         startPauseButton.setBackgroundResource(R.drawable.play_button);
     }
 
+    private void displayPhase(){
+        if(phaseDisplayed != 0){
+            phaseTextView.setText("Phase " + phaseDisplayed);
+            if(phaseDisplayed != 1){
+                MediaPlayer.create(this, R.raw.japanese_singing_bowl).start();
+            }
+        }else {
+            phaseTextView.setText("Phase " + 1);
+        }
+        phaseDisplayed++;
+
+    }
+
     private void updateCountdownText(){
 
         int minutes;
@@ -116,7 +126,9 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
 
         long difference = timeSetInMilliseconds - timeLeftInMilliseconds;
 
-        phaseTextView.setText("Phase " + phase);
+        countPhases(difference);
+
+
 
         if(timerPositive) {
             minutes = (int) (timeLeftInMilliseconds / 1000) / 60;
@@ -134,12 +146,19 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
             timeTextView.setText(timeLeftFormatted);
         }
 
-        updatePhaseText();
+
 
     }
 
-    private void updatePhaseText(){
-        //if(phase = )
+    private void countPhases(long difference){
+        if((timeLeftInMilliseconds / timePerPhaseInMilliseconds == phase)){
+            phase--;
+
+            displayPhase();
+
+        }
+
+
     }
 
 
