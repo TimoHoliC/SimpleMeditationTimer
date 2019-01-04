@@ -10,6 +10,8 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class MeditationActivity extends AppCompatActivity implements View.OnClickListener {
@@ -21,12 +23,16 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
     private long timeLeftInMilliseconds;
     private boolean timerRunning;
     private MediaPlayer singingBowlSound;
+    private List<MediaPlayer> mediaPlayerList = new ArrayList<MediaPlayer>();
+    private List<MediaPlayer> mediaPlayerEndgongList = new ArrayList<MediaPlayer>();
     private boolean timerPositive;
     private long timeSetInMilliseconds;
     private long timePerPhaseInMilliseconds;
     private int phase;
     private int phaseDisplayed;
     private Intent intent;
+    private long bellDelay;
+    int counter;
 
 
 
@@ -37,6 +43,7 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
         setContentView(R.layout.activity_meditation);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         phaseDisplayed = 0;
+        counter = 0;
         timerPositive = true;
         intent = getIntent();
         timeLeftInMilliseconds = intent.getLongExtra("lastOfMeditation",0);
@@ -61,6 +68,14 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
+    public void stopAndClearMediaPlayerList(List<MediaPlayer> mpList){
+
+        for(MediaPlayer mp : mpList){
+            mp.pause();
+        }
+
+        mpList.clear();
+    }
 
 
     @Override
@@ -69,6 +84,9 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
 
         if(ce == R.id.startPauseButton && timerRunning){
             pauseTimer();
+            stopAndClearMediaPlayerList(mediaPlayerEndgongList);
+            stopAndClearMediaPlayerList(mediaPlayerList);
+            mediaPlayerList.clear();
         }else if(ce == R.id.startPauseButton && !timerRunning){
             startTimer();
         }else if (ce == R.id.timeTextView && timerPositive){
@@ -91,13 +109,44 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
 
             @Override
             public void onFinish() {
-
-                singingBowlSound.start();
+                updateCountdownText();
+                ringEndbellTimer();
             }
         }.start();
 
         timerRunning = true;
         startPauseButton.setBackgroundResource(R.drawable.pause_button);
+    }
+
+    public void ringEndbellTimer(){
+        for(int i = 0; i < 3; i++){
+            mediaPlayerEndgongList.add(MediaPlayer.create(this, R.raw.japanese_singing_bowl));
+        }
+
+        countDownTimer = new CountDownTimer(4000, 1000) {
+
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+               bellDelay = millisUntilFinished;
+               ringEndbell();
+
+
+            }
+
+            @Override
+            public void onFinish() {
+
+
+            }
+        }.start();
+
+
+    }
+
+    private void ringEndbell(){
+        mediaPlayerEndgongList.get(counter).start();
+        counter++;
     }
 
     private void pauseTimer(){
@@ -110,7 +159,8 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
         if(phaseDisplayed != 0){
             phaseTextView.setText("Phase " + phaseDisplayed);
             if(phaseDisplayed != 1){
-                MediaPlayer.create(this, R.raw.japanese_singing_bowl).start();
+                mediaPlayerList.add(MediaPlayer.create(this, R.raw.japanese_singing_bowl));
+                mediaPlayerList.get(mediaPlayerList.size()-1).start();
             }
         }else {
             phaseTextView.setText("Phase " + 1);
@@ -124,7 +174,7 @@ public class MeditationActivity extends AppCompatActivity implements View.OnClic
         int minutes;
         int seconds;
 
-        long difference = timeSetInMilliseconds - timeLeftInMilliseconds;
+        long difference = timeSetInMilliseconds - timeLeftInMilliseconds + 900;
 
         countPhases(difference);
 
